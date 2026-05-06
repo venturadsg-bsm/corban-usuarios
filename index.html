@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#185FA5" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>Gestão de Usuários — Corban / Vanguard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+    --text-primary: #1a1a2e;
+    --text-secondary: #6b7280;
+    --text-hint: #9ca3af;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --blue-dark: #0C447C;
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #085041;
+    --purple: #7F77DD;
+    --purple-light: #EEEDFE;
+    --purple-dark: #3C3489;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-dark: #791F1F;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --amber-dark: #633806;
+    --gray: #888780;
+    --gray-light: #F1EFE8;
+    --gray-dark: #444441;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 1.25rem;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 17px; flex-shrink: 0;
+  }
+  .topbar-title { font-size: 14px; font-weight: 600; }
+  .topbar-sub { font-size: 11px; color: var(--text-secondary); }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .tag {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: var(--blue-light);
+    color: var(--blue-dark);
+    white-space: nowrap;
+  }
+
+  /* ── QUICK ADD (FAB-style mobile) ── */
+  .fab {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    z-index: 20;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 13px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 4px 16px rgba(24,95,165,0.35);
+    transition: background .15s, transform .1s;
+  }
+  .fab:hover { background: var(--blue-dark); }
+  .fab:active { transform: scale(0.97); }
+
+  /* ── MODAL ── */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 30;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 1.25rem 2rem;
+    width: 100%; max-width: 520px;
+    animation: slideUp .22s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border-strong);
+    border-radius: 4px;
+    margin: 0 auto 1.2rem;
+  }
+  .modal-title {
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .modal-fields { display: flex; flex-direction: column; gap: 10px; }
+  .modal-fields input,
+  .modal-fields select {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    background: var(--bg);
+    color: var(--text-primary);
+    width: 100%;
+  }
+  .modal-fields input:focus,
+  .modal-fields select:focus { outline: none; border-color: var(--blue); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn-confirm {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 11px 0;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--blue);
+    color: #fff;
+    cursor: pointer;
+    flex: 1;
+    transition: background .15s;
+  }
+  .btn-confirm:hover { background: var(--blue-dark); }
+  .btn-cancel {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px; font-weight: 500;
+    padding: 11px 18px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-cancel:hover { background: var(--border); }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1rem 6rem; }
+
+  /* ── KPI ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .85rem 1rem;
+    position: relative; overflow: hidden;
+    transition: border-color .15s;
+  }
+  .kpi:hover { border-color: var(--border-strong); }
+  .kpi-bar {
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .kpi-label {
+    font-size: 10px; font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 4px;
+  }
+  .kpi-value { font-size: 24px; font-weight: 600; line-height: 1; margin-bottom: 2px; }
+  .kpi-sub { font-size: 10.5px; color: var(--text-hint); }
+
+  /* ── STRIP ── */
+  .strip {
+    border-radius: var(--radius-sm);
+    padding: .75rem 1rem;
+    font-size: 13px; font-weight: 500;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .strip-over  { background: var(--amber-light); color: var(--amber-dark); border: 0.5px solid #EF9F27; }
+  .strip-ok    { background: var(--red-light);   color: var(--red-dark);   border: 0.5px solid #E24B4A; }
+  .strip-exact { background: var(--green-light); color: var(--green-dark); border: 0.5px solid #5DCAA5; }
+
+  /* ── ROW 2 ── */
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  @media(max-width: 500px) { .row-2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .9rem 1.1rem;
+  }
+  .card-label {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 9px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .lic-inner { display: flex; align-items: center; gap: 10px; }
+  .lic-inner input {
+    font-family: 'Poppins', sans-serif;
+    width: 76px; text-align: center;
+    font-size: 18px; font-weight: 600;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 7px 8px;
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+  .lic-inner input:focus { outline: none; border-color: var(--blue); }
+  .lic-diff { font-size: 12px; font-weight: 600; }
+
+  .search-wrap { position: relative; }
+  .search-wrap input {
+    font-family: 'Poppins', sans-serif;
+    width: 100%; font-size: 13px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px 9px 34px;
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+  .search-wrap input:focus { outline: none; border-color: var(--blue); }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-hint); font-size: 15px;
+    pointer-events: none;
+  }
+
+  /* ── TEAMS GRID ── */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .team-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .team-card:hover { border-color: var(--border-strong); }
+  .team-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .7rem .9rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .team-name-row { display: flex; align-items: center; gap: 7px; }
+  .team-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .team-name { font-size: 12px; font-weight: 600; }
+  .badge {
+    font-size: 11px; font-weight: 600;
+    padding: 2px 9px; border-radius: 99px;
+  }
+  .member-list { list-style: none; padding: 0 .85rem; }
+  .member-item {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 0.5px solid var(--border);
+    gap: 6px;
+  }
+  .member-item:last-child { border-bottom: none; }
+  .member-left { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; flex-shrink: 0;
+  }
+  .member-name {
+    font-size: 12px; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .member-date {
+    font-size: 10px; color: var(--text-hint);
+    white-space: nowrap;
+  }
+  .del-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-hint);
+    padding: 3px 5px; border-radius: 4px;
+    font-size: 14px; line-height: 1;
+    transition: color .1s;
+    flex-shrink: 0;
+  }
+  .del-btn:hover { color: var(--red); }
+  .empty {
+    font-size: 12px; color: var(--text-hint);
+    text-align: center; padding: 14px 0; font-style: italic;
+  }
+
+  /* ── HISTORY ── */
+  .history-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    margin-top: 1.25rem;
+  }
+  .history-list { list-style: none; }
+  .history-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+  .history-text { flex: 1; color: var(--text-primary); }
+  .history-time { color: var(--text-hint); font-size: 10.5px; white-space: nowrap; }
+
+  .footer {
+    text-align: center; font-size: 11px;
+    color: var(--text-hint); padding: 1.5rem 0 .5rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo"><i class="ti ti-users"></i></div>
+    <div>
+      <div class="topbar-title">Gestão de Usuários</div>
+      <div class="topbar-sub">Corban / Vanguard</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="tag" id="total-tag">— ativos</span>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openModal()">
+  <i class="ti ti-user-plus" style="font-size:18px"></i>
+  Novo usuário
+</button>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <i class="ti ti-user-plus" style="color:var(--blue);font-size:17px"></i>
+      Adicionar usuário
+    </div>
+    <div class="modal-fields">
+      <input type="text" id="new-name" placeholder="Nome completo" autocomplete="off" />
+      <select id="new-team">
+        <option value="lav">Equipe Lavínia</option>
+        <option value="mat">Equipe Matheus</option>
+        <option value="nay">Equipe Nay</option>
+        <option value="trei">Treinamento</option>
+        <option value="gois">Góis Promotora</option>
+        <option value="mon">Monitoria</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="addUser()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="strip" id="strip"></div>
+
+  <div class="row-2">
+    <div class="card">
+      <div class="card-label">
+        <i class="ti ti-ticket" style="font-size:13px"></i>
+        Licenças contratadas
+      </div>
+      <div class="lic-inner">
+        <input type="number" id="lic-input" value="59" min="0" />
+        <span class="lic-diff" id="lic-diff"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">
+        <i class="ti ti-search" style="font-size:13px"></i>
+        Buscar usuário
+      </div>
+      <div class="search-wrap">
+        <i class="ti ti-search search-icon"></i>
+        <input type="text" id="search" placeholder="Digite um nome..." />
+      </div>
+    </div>
+  </div>
+
+  <div class="teams-grid" id="teams-grid"></div>
+
+  <!-- Histórico -->
+  <div class="history-card">
+    <div class="card-label" style="margin-bottom:10px">
+      <i class="ti ti-clock-hour-4" style="font-size:13px"></i>
+      Últimas adições
+    </div>
+    <ul class="history-list" id="history-list">
+      <li><p class="empty">Nenhum registro ainda.</p></li>
+    </ul>
+  </div>
+
+  <div class="footer">Corban / Vanguard — gestão de licenças</div>
+</div>
+
+<script>
+const TEAMS = {
+  lav:  { name:'Equipe Lavínia',  color:'#378ADD', bg:'#E6F1FB', text:'#0C447C' },
+  mat:  { name:'Equipe Matheus',  color:'#1D9E75', bg:'#E1F5EE', text:'#085041' },
+  nay:  { name:'Equipe Nay',      color:'#7F77DD', bg:'#EEEDFE', text:'#3C3489' },
+  trei: { name:'Treinamento',     color:'#E24B4A', bg:'#FCEBEB', text:'#791F1F' },
+  gois: { name:'Góis Promotora',  color:'#BA7517', bg:'#FAEEDA', text:'#633806' },
+  mon:  { name:'Monitoria',       color:'#888780', bg:'#F1EFE8', text:'#444441' }
+};
+
+let data = {
+  lav:  ['Breno Morais Santos','Anny Karoline','Paulo Victor Silva','Ingryd Andrade dos Santos','Ruth Nielly dos Santos Araujo','Rayane Rodrigues dos Santos','Rayane Nascimento da Silva','Iris Lohany','Vitória Lima Santos','Isabelle Santana dos Reis','Ana Paula'],
+  mat:  ['Brendy Jheine','Candida Regina Azevedo Porto','Jenifer Janine Bento França','Luana Gonçalves Silva','Osvaldina dos Santos Dantas','Thainara Bento da Silva','Keylla Santos','Ana Clara Costa Santos','Milene Marcelino','Alderlainne Costa Rodrigues','Raquel Pereira','Stela Janice Carregosa Nascimento','Alisson de Jesus Souza'],
+  nay:  ['Camila Lima','Thainá Tavares de Oliveira','Thaiza Santos Gomes Nascimento','Fernanda Oliveira','Emanuelle Carvalho','Emilainny Freire Santos','Thaynara Aguiar dos Santos','Ana Caroline Oliveira Alves','Ingridy Kerolly Silva Santos','Micaele Jesus Nonato','Mayara Menezes Braz Ferreira'],
+  trei: ['Treinamento1','Treinamento2','Treinamento3','Treinamento4','Treinamento5','Treinamento6'],
+  gois: ['Evelyn Dayana','Layane Silva Santos','Tauhany Moreira','Rosimary Vitorio','Cleidiane Oliveira','Laura Leticia','Daiane dos Santos','Laiane Conceicao','Maria Vitoria','Luiza Katiuce Santana Correia','Rafaela Santos','Raony Messias da Silva Cruz','Maria Veronica','Brenda Eduarda','Catia Valeria'],
+  mon:  ['Wesley']
+};
+
+let history = []; // { name, team, date }
+const STORAGE_KEY = 'corban_data_v2';
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, history, lic: document.getElementById('lic-input').value })); } catch(e) {}
+}
+
+function load() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.data) data = parsed.data;
+      if (parsed.history) history = parsed.history;
+      if (parsed.lic) document.getElementById('lic-input').value = parsed.lic;
+    }
+  } catch(e) {}
+}
+
+function initials(n) {
+  const p = n.trim().split(' ');
+  return p.length >= 2 ? p[0][0] + p[p.length-1][0] : n.slice(0,2).toUpperCase();
+}
+
+function total() {
+  return Object.values(data).reduce((a,b) => a + b.length, 0);
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) + ' ' +
+         d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function render() {
+  const q   = document.getElementById('search').value.toLowerCase().trim();
+  const tot = total();
+  const lic = parseInt(document.getElementById('lic-input').value) || 0;
+  const diff = lic - tot;
+
+  document.getElementById('total-tag').textContent = tot + ' ativos';
+
+  // KPIs
+  const kg = document.getElementById('kpi-grid');
+  kg.innerHTML =
+    `<div class="kpi"><div class="kpi-bar" style="background:#185FA5"></div><div class="kpi-label">Total geral</div><div class="kpi-value" style="color:#185FA5">${tot}</div><div class="kpi-sub">usuários ativos</div></div>` +
+    `<div class="kpi"><div class="kpi-bar" style="background:#1D9E75"></div><div class="kpi-label">Licenças</div><div class="kpi-value" style="color:#1D9E75">${lic}</div><div class="kpi-sub">contratadas</div></div>` +
+    Object.entries(data).map(([k,v]) =>
+      `<div class="kpi"><div class="kpi-bar" style="background:${TEAMS[k].color}"></div><div class="kpi-label">${TEAMS[k].name.replace('Equipe ','')}</div><div class="kpi-value" style="color:${TEAMS[k].color}">${v.length}</div><div class="kpi-sub">usuários</div></div>`
+    ).join('');
+
+  // Strip
+  const sDiff = document.getElementById('lic-diff');
+  const strip = document.getElementById('strip');
+  if (diff > 0) {
+    sDiff.textContent = `+${diff} sobrando`; sDiff.style.color = '#854F0B';
+    strip.className = 'strip strip-over';
+    strip.innerHTML = `<i class="ti ti-alert-triangle" style="font-size:16px;flex-shrink:0"></i> Você está pagando por <strong style="margin:0 3px">${diff}</strong> licença(s) a mais do que o necessário.`;
+  } else if (diff < 0) {
+    sDiff.textContent = `${Math.abs(diff)} faltando`; sDiff.style.color = '#791F1F';
+    strip.className = 'strip strip-ok';
+    strip.innerHTML = `<i class="ti ti-alert-circle" style="font-size:16px;flex-shrink:0"></i> Atenção: faltam <strong style="margin:0 3px">${Math.abs(diff)}</strong> licença(s) para cobrir todos os usuários.`;
+  } else {
+    sDiff.textContent = 'exatas'; sDiff.style.color = '#085041';
+    strip.className = 'strip strip-exact';
+    strip.innerHTML = `<i class="ti ti-circle-check" style="font-size:16px;flex-shrink:0"></i> Licenças exatas — tudo em dia.`;
+  }
+
+  // Teams
+  const grid = document.getElementById('teams-grid');
+  grid.innerHTML = Object.entries(data).map(([key, members]) => {
+    const t = TEAMS[key];
+    const filtered = q ? members.filter(m => m.toLowerCase().includes(q)) : members;
+    const items = filtered.map(m =>
+      `<li class="member-item">
+        <span class="member-left">
+          <span class="avatar" style="background:${t.bg};color:${t.text}">${initials(m)}</span>
+          <span class="member-name">${m}</span>
+        </span>
+        <button class="del-btn" onclick="removeUser('${key}','${m.replace(/'/g,"\\'")}')" title="Remover">
+          <i class="ti ti-trash"></i>
+        </button>
+      </li>`
+    ).join('');
+    return `
+      <div class="team-card">
+        <div class="team-head">
+          <div class="team-name-row">
+            <div class="team-dot" style="background:${t.color}"></div>
+            <span class="team-name">${t.name}</span>
+          </div>
+          <span class="badge" style="background:${t.bg};color:${t.text}">${members.length}</span>
+        </div>
+        <ul class="member-list">${items || `<li><p class="empty">${q ? 'Nenhum resultado' : 'Sem usuários'}</p></li>`}</ul>
+      </div>`;
+  }).join('');
+
+  // History
+  const hl = document.getElementById('history-list');
+  if (history.length === 0) {
+    hl.innerHTML = '<li><p class="empty">Nenhum registro ainda.</p></li>';
+  } else {
+    hl.innerHTML = [...history].reverse().slice(0, 15).map(h => {
+      const t = TEAMS[h.team];
+      return `<li class="history-item">
+        <span class="history-dot" style="background:${t.color}"></span>
+        <span class="history-text"><strong>${h.name}</strong> adicionado(a) em ${t.name}</span>
+        <span class="history-time">${fmtDate(h.date)}</span>
+      </li>`;
+    }).join('');
+  }
+}
+
+function removeUser(team, name) {
+  if (!confirm(`Remover "${name}" da lista?`)) return;
+  data[team] = data[team].filter(m => m !== name);
+  save(); render();
+}
+
+function addUser() {
+  const name = document.getElementById('new-name').value.trim();
+  const team = document.getElementById('new-team').value;
+  if (!name) { document.getElementById('new-name').focus(); return; }
+  if (data[team].includes(name)) { alert('Usuário já existe nesta equipe.'); return; }
+  data[team].push(name);
+  history.push({ name, team, date: new Date().toISOString() });
+  document.getElementById('new-name').value = '';
+  closeModal();
+  save(); render();
+}
+
+function openModal() {
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('new-name').focus(), 250);
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+document.getElementById('lic-input').addEventListener('input', () => { save(); render(); });
+document.getElementById('search').addEventListener('input', render);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) addUser();
+});
+
+load();
+render();
+</script>
+</body>
+</html>
